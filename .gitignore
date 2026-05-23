@@ -1,12 +1,39 @@
 venv/
+.venv/
+env/
+ENV/
 __pycache__/
 *.py[cod]
+*.pyo
+.Python
+
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 dashboard/frontend/node_modules/
 dashboard/frontend/dist/
 dashboard/public/detections/
 
 *.db
+*.db-*
+*.sqlite
+*.sqlite3
 models/**/*.pth
+models/*.pth
+models/**/*.pt
+models/*.pt
+models/**/*.onnx
+models/*.onnx
 
 .env
+.env.*
+!.env.example
+
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
