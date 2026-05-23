@@ -17,7 +17,7 @@ services:
       - key: INGEST_TOKEN
         sync: false
       - key: ALLOW_RESET
-        value: "false"
+        value: "true"
       - key: CORS_ORIGINS
         value: "*"
       - key: DETECTION_THRESHOLD

@@ -140,6 +140,8 @@ function App() {
         setMapZoom(13);
       } catch (err) {
         console.error("Failed to reset DB", err);
+        const message = err.response?.data?.detail || "Failed to purge data. Check the deployment settings and try again.";
+        window.alert(message);
       }
     }
   };
