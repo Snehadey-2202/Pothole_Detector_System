@@ -1,0 +1,12 @@
+.git
+.env
+venv
+__pycache__
+*.pyc
+*.db
+*.db-journal
+dashboard/frontend/node_modules
+dashboard/frontend/dist
+dashboard/public/detections
+dataset
+models

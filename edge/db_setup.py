@@ -1,8 +1,16 @@
 import os
 import sqlite3
+import sys
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, ROOT_DIR)
+
+from env_utils import load_env_file
+
+load_env_file()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "detections.db")
+DB_PATH = os.path.join(ROOT_DIR, "detections.db")
 
 def get_db_connection():
     if DATABASE_URL:
@@ -75,4 +83,3 @@ def init_db():
 
 if __name__ == "__main__":
     init_db()
-

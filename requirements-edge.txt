@@ -1,0 +1,6 @@
+torch
+torchvision
+Pillow
+schedule
+requests
+psycopg2-binary>=2.9.0

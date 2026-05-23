@@ -18,7 +18,15 @@ import {
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+
+function getImageUrl(imagePath) {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  return `${API_BASE_URL}${imagePath}`;
+}
 
 // Custom Map Controller to pan and fly to selected detection
 function ChangeMapView({ center, zoom }) {
@@ -80,6 +88,7 @@ function SmoothImage({ src, alt, className, onError }) {
 function App() {
   const [detections, setDetections] = useState([]);
   const [stats, setStats] = useState({ total_detected: 0 });
+  const [liveStatus, setLiveStatus] = useState({ has_frame: false });
   const [timestamp, setTimestamp] = useState(0);
   const [chartData, setChartData] = useState([]);
   const [mapCenter, setMapCenter] = useState([37.7749, -122.4194]);
@@ -91,12 +100,14 @@ function App() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [detRes, statsRes] = await Promise.all([
+      const [detRes, statsRes, liveStatusRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/api/detections`),
-        axios.get(`${API_BASE_URL}/api/stats`)
+        axios.get(`${API_BASE_URL}/api/stats`),
+        axios.get(`${API_BASE_URL}/api/live-status`)
       ]);
       setDetections(detRes.data);
       setStats(statsRes.data);
+      setLiveStatus(liveStatusRes.data);
       
       // Update chart data (group by minute or just show last 12)
       const recent = [...detRes.data].reverse().slice(-12);
@@ -186,6 +197,16 @@ function App() {
   const medRiskPct = detections.length > 0
     ? ((medRiskCount / detections.length) * 100).toFixed(0)
     : 0;
+
+  const livePrediction = liveStatus.prediction
+    ? liveStatus.prediction.replace('_', ' ')
+    : 'Awaiting frame';
+  const liveConfidence = typeof liveStatus.confidence === 'number'
+    ? `${Math.round(liveStatus.confidence * 100)}%`
+    : '--';
+  const liveUpdatedAt = liveStatus.frame_updated_at
+    ? new Date(liveStatus.frame_updated_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})
+    : '--';
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col font-sans overflow-x-hidden antialiased">
@@ -289,7 +310,7 @@ function App() {
                   <Camera className="w-3.5 h-3.5 text-primary" /> Live Cam Feed
                 </h2>
                 <span className="text-[9px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 animate-pulse">
-                  ONLINE
+                  {liveStatus.has_frame ? 'ONLINE' : 'WAITING'}
                 </span>
               </div>
               
@@ -313,12 +334,16 @@ function App() {
                     <span className="text-slate-200 font-bold">CAM_01_EDGE</span>
                   </div>
                   <div className="flex justify-between items-center text-muted">
-                    <span>Latency</span>
-                    <span className="text-primary font-bold">~42ms</span>
+                    <span>Last Frame</span>
+                    <span className="text-primary font-bold">{liveUpdatedAt}</span>
                   </div>
                   <div className="flex justify-between items-center text-muted">
-                    <span>Processing Node</span>
-                    <span className="text-accent font-bold">EDGE_AI_01</span>
+                    <span>Prediction</span>
+                    <span className="text-accent font-bold uppercase">{livePrediction}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-muted">
+                    <span>Confidence</span>
+                    <span className="text-slate-200 font-bold">{liveConfidence}</span>
                   </div>
                 </div>
               </div>
@@ -352,7 +377,7 @@ function App() {
                       <div className="w-48 flex flex-col gap-2 p-1.5 text-text">
                         <div className="relative rounded-lg overflow-hidden border border-white/5 shadow-inner bg-black/40 h-28">
                           <img 
-                            src={`${API_BASE_URL}${det.image_path}`} 
+                            src={getImageUrl(det.image_path)} 
                             alt="Pothole detection" 
                             className="w-full h-full object-cover"
                           />
@@ -422,7 +447,7 @@ function App() {
                         >
                           <div className="relative flex-shrink-0">
                             <img 
-                              src={`${API_BASE_URL}${det.image_path}`} 
+                              src={getImageUrl(det.image_path)} 
                               alt="pothole thumbnail" 
                               className={`w-14 h-14 object-cover rounded-lg border transition-all duration-300 ${
                                 isSelected ? 'border-primary' : 'border-white/5 group-hover:border-primary/30'
@@ -567,7 +592,7 @@ function App() {
                       <div className="w-48 flex flex-col gap-2 p-1.5 text-text">
                         <div className="relative rounded-lg overflow-hidden border border-white/5 shadow-inner bg-black/40 h-28">
                           <img 
-                            src={`${API_BASE_URL}${det.image_path}`} 
+                            src={getImageUrl(det.image_path)} 
                             alt="Pothole detection" 
                             className="w-full h-full object-cover"
                           />
