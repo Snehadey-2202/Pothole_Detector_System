@@ -259,19 +259,34 @@ def reset_db():
 @app.post("/api/run-edge")
 def run_edge():
     """Runs the run_edge.ps1 script."""
-    script_path = os.path.join(ROOT_DIR, "run_edge.ps1")
-    if not os.path.exists(script_path):
-        raise HTTPException(status_code=404, detail="Edge script not found")
-    
-    try:
-        subprocess.Popen(
-            ["powershell.exe", "-ExecutionPolicy", "Bypass", "-NoExit", "-File", script_path],
-            cwd=ROOT_DIR,
-            creationflags=subprocess.CREATE_NEW_CONSOLE if os.name == 'nt' else 0
-        )
-        return {"message": "Edge node started successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if os.name == 'nt':
+        script_path = os.path.join(ROOT_DIR, "run_edge.ps1")
+        if not os.path.exists(script_path):
+            raise HTTPException(status_code=404, detail="Edge script not found")
+        
+        try:
+            subprocess.Popen(
+                ["powershell.exe", "-ExecutionPolicy", "Bypass", "-NoExit", "-File", script_path],
+                cwd=ROOT_DIR,
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
+            return {"message": "Edge node started successfully (Windows)"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    else:
+        # Linux / Render deployment
+        edge_script = os.path.join(ROOT_DIR, "edge", "scheduler.py")
+        if not os.path.exists(edge_script):
+            raise HTTPException(status_code=404, detail="Edge script not found in deployment")
+        
+        try:
+            subprocess.Popen(
+                [sys.executable, edge_script],
+                cwd=os.path.join(ROOT_DIR, "edge")
+            )
+            return {"message": "Edge node started successfully (Linux)"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/{catchall:path}")
 def catch_all(catchall: str):

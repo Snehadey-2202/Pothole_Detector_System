@@ -12,10 +12,15 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-edge.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-edge.txt
 
 COPY env_utils.py ./
 COPY dashboard ./dashboard
+COPY edge ./edge
+COPY ml ./ml
+COPY models ./models
+COPY dataset ./dataset
 COPY --from=frontend-build /app/dashboard/frontend/dist ./dashboard/frontend/dist
 
 RUN mkdir -p dashboard/public/detections
