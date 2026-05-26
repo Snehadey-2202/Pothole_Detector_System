@@ -146,6 +146,17 @@ function App() {
     }
   };
 
+  const handleRunEdge = async () => {
+    try {
+      await axios.post(`${API_BASE_URL}/api/run-edge`);
+      window.alert("Edge node startup initiated.");
+    } catch (err) {
+      console.error("Failed to start edge node", err);
+      const message = err.response?.data?.detail || "Failed to start edge node.";
+      window.alert(message);
+    }
+  };
+
   const handleLogClick = (det) => {
     setSelectedDetId(det.id);
     setMapCenter([det.latitude, det.longitude]);
@@ -256,6 +267,16 @@ function App() {
               {runningAvgConf}%
             </span>
           </div>
+
+          {/* Run Edge Action */}
+          <button 
+            onClick={handleRunEdge}
+            className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-3.5 py-2 rounded-xl transition-all active:scale-95 text-xs font-bold shadow-md shadow-primary/5"
+            title="Start edge node telemetry"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>Start Edge Node</span>
+          </button>
 
           {/* Reset / Purge Action */}
           <button 

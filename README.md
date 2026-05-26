@@ -1,10 +1,12 @@
 # Pothole Detector System
 
+**Live Demo:** [https://pothole-detector-vajb.onrender.com/](https://pothole-detector-vajb.onrender.com/)
 Local-first pothole detection demo with:
 
 - FastAPI backend serving the API and production React build
 - React dashboard for live frames, detections, map, and analytics
 - Edge runner that processes frames, writes local detections, and can push to a deployed backend
+- Integrated button in the dashboard to start the edge node remotely
 
 ## Local Development
 

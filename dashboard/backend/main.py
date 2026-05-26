@@ -10,6 +10,7 @@ import sys
 import json
 from datetime import datetime
 from uuid import uuid4
+import subprocess
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT_DIR)
@@ -254,6 +255,23 @@ def reset_db():
     query = "DELETE FROM detections"
     run_query(query, commit=True)
     return {"message": "Database reset successfully"}
+
+@app.post("/api/run-edge")
+def run_edge():
+    """Runs the run_edge.ps1 script."""
+    script_path = os.path.join(ROOT_DIR, "run_edge.ps1")
+    if not os.path.exists(script_path):
+        raise HTTPException(status_code=404, detail="Edge script not found")
+    
+    try:
+        subprocess.Popen(
+            ["powershell.exe", "-ExecutionPolicy", "Bypass", "-NoExit", "-File", script_path],
+            cwd=ROOT_DIR,
+            creationflags=subprocess.CREATE_NEW_CONSOLE if os.name == 'nt' else 0
+        )
+        return {"message": "Edge node started successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/{catchall:path}")
 def catch_all(catchall: str):
