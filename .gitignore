@@ -21,12 +21,7 @@ dashboard/public/detections/
 *.db-*
 *.sqlite
 *.sqlite3
-models/**/*.pth
-models/*.pth
-models/**/*.pt
-models/*.pt
-models/**/*.onnx
-models/*.onnx
+
 
 .env
 .env.*
